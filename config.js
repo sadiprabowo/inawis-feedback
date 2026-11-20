@@ -13,5 +13,5 @@
 //   - localStorage sebagai fallback terakhir
 // ============================================================
 window.INWIS_CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxDXyJ0TW35IyKB3ksUMf2jMqhWdJFyVyOKsO-qCnh6bzUVrNUUH94xg6Z02MkAlUm5/exec'
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/library/d/1Cu2_oTP1nYDiAHcR6g9TYrJFJfeWBoZqP1pCjcGEAP_ZI_2ZI6fiHKRx/1'
 };
