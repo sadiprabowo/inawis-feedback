@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InaWIS V2 — Rekap Feedback</title>
+<style>
+  :root {
+    --navy: #0b3d66;
+    --navy-dark: #072c4a;
+    --teal: #00a8cc;
+    --teal-light: #e6f7fb;
+    --bg: #f2f6fa;
+    --card: #ffffff;
+    --text: #1f2d3d;
+    --muted: #6b7a8d;
+    --border: #dbe4ee;
+    --danger: #d64545;
+    --warning: #e6a23c;
+    --success: #1f9d55;
+    --radius: 12px;
+    --shadow: 0 2px 10px rgba(11, 61, 102, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Segoe UI", "Inter", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .topbar {
+    background: linear-gradient(135deg, var(--navy-dark), var(--navy) 55%, #0e5a8a);
+    color: #fff;
+    padding: 22px 20px 18px;
+  }
+  .topbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .topbar .logo {
+    width: 42px; height: 42px; border-radius: 10px; background: var(--teal);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px; color: #fff; flex-shrink: 0;
+  }
+  .topbar h1 { font-size: 1.35rem; font-weight: 700; line-height: 1.25; }
+  .topbar .subtitle { font-size: 0.9rem; opacity: 0.9; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    margin-bottom: 18px;
+  }
+  .toolbar .spacer { flex: 1; }
+  .btn {
+    padding: 10px 18px; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s; font-family: inherit;
+  }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: var(--navy-dark); }
+  .btn-secondary { background: #fff; color: var(--navy); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--navy); }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 18px;
+  }
+  .stat-card .stat-num { font-size: 1.9rem; font-weight: 800; color: var(--navy); line-height: 1.1; }
+  .stat-card .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px;
+  }
+  .panel h2 { font-size: 1.05rem; color: var(--navy); margin-bottom: 14px; }
+
+  .filters {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+  }
+  .filters select, .filters input {
+    padding: 9px 12px; font-size: 0.9rem; font-family: inherit;
+    border: 1.5px solid var(--border); border-radius: 8px; background: #fff; color: var(--text);
+  }
+  .filters select:focus, .filters input:focus {
+    outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,168,204,0.15);
+  }
+  .filters input { flex: 1; min-width: 180px; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  thead th {
+    background: var(--navy); color: #fff; text-align: left; padding: 10px 12px;
+    position: sticky; top: 0; white-space: nowrap;
+  }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: var(--teal-light); }
+  tbody tr:nth-child(even) { background: #fafcfe; }
+  tbody tr:nth-child(even):hover { background: var(--teal-light); }
+
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+  }
+  .badge-tinggi { background: #fdecec; color: var(--danger); }
+  .badge-sedang { background: #fdf3e3; color: var(--warning); }
+  .badge-rendah { background: #e3f7ec; color: var(--success); }
+  .badge-bug { background: #fdecec; color: var(--danger); }
+  .badge-data { background: #e8f0fe; color: #2b5fd9; }
+  .badge-usability { background: #fdf3e3; color: var(--warning); }
+  .badge-request { background: #e3f7ec; color: var(--success); }
+
+  .empty {
+    text-align: center; color: var(--muted); padding: 40px 20px;
+  }
+  .empty .icon { font-size: 40px; margin-bottom: 10px; }
+
+  .loading {
+    text-align: center; color: var(--muted); padding: 40px 20px;
+  }
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid var(--border);
+    border-top-color: var(--teal); border-radius: 50%;
+    margin: 0 auto 12px; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box {
+    display: none; background: #fdecec; border: 1px solid #f5c6c6; color: var(--danger);
+    padding: 14px 16px; border-radius: 8px; margin-bottom: 18px; font-size: 0.9rem;
+  }
+  .error-box.show { display: block; }
+
+  .config-note {
+    background: var(--teal-light); border: 1px solid #bfe7f0; color: var(--navy);
+    padding: 14px 16px; border-radius: 8px; margin-bottom: 18px; font-size: 0.9rem;
+  }
+  .config-note code { background: #fff; padding: 1px 6px; border-radius: 4px; }
+
+  .footer-note { text-align: center; color: var(--muted); font-size: 0.78rem; margin: 18px 0 30px; }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .toolbar { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">IW</div>
+    <div>
+      <h1>InaWIS V2 — Rekap Feedback</h1>
+      <div class="subtitle">Ringkasan seluruh umpan balik pengguna yang telah dikirim</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="config-note" id="config-note">
+    <strong>Belum terhubung ke spreadsheet.</strong> Buka file ini, cari konstanta
+    <code>APPS_SCRIPT_URL</code>, lalu tempel "Web app URL" dari Google Apps Script
+    (sama seperti yang dipakai di <code>index.html</code>).
+  </div>
+
+  <div class="error-box" id="error-box"></div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" id="btn-refresh">⟳ Muat Ulang</button>
+    <button class="btn btn-secondary" id="btn-export">⬇ Ekspor CSV</button>
+    <div class="spacer"></div>
+    <span id="auto-refresh" style="font-size:0.82rem;color:var(--muted);"></span>
+    <span id="last-updated" style="font-size:0.82rem;color:var(--muted);"></span>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="panel">
+    <h2>Daftar Feedback</h2>
+    <div class="filters">
+      <select id="filter-fitur" onchange="renderTable()">
+        <option value="">Semua Fitur</option>
+      </select>
+      <select id="filter-jenis" onchange="renderTable()">
+        <option value="">Semua Jenis</option>
+      </select>
+      <select id="filter-urgensi" onchange="renderTable()">
+        <option value="">Semua Urgensi</option>
+      </select>
+      <input type="text" id="filter-search" placeholder="Cari nama / deskripsi / UPT..." oninput="renderTable()">
+    </div>
+    <div class="table-wrap">
+      <div id="table-container"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">InaWIS V2 Soft Launch — Halaman Rekap Feedback · UPT Meteorologi Maritim</div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  // Resolusi endpoint: prioritas ke Google Apps Script (config.js),
+  // lalu server lokal (server.rb), lalu localStorage.
+  const configured = (window.INWIS_CONFIG && window.INWIS_CONFIG.APPS_SCRIPT_URL) || '';
+  const isLocal = window.location.protocol === 'http:' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const APPS_SCRIPT_URL = configured || (isLocal ? '/api/submissions' : '');
+
+  // Interval auto-refresh (dalam detik). Halaman akan otomatis memuat ulang
+  // data dari spreadsheet setiap interval ini, sehingga feedback baru langsung tampil.
+  const AUTO_REFRESH_SECONDS = 30;
+
+  let headers = [];
+  let rows = [];
+  let colIndex = {}; // map nama kolom -> index
+
+  const configNote = document.getElementById('config-note');
+  const errorBox = document.getElementById('error-box');
+  const statsEl = document.getElementById('stats');
+  const tableContainer = document.getElementById('table-container');
+  const lastUpdated = document.getElementById('last-updated');
+  const autoRefreshEl = document.getElementById('auto-refresh');
+
+  let countdown = AUTO_REFRESH_SECONDS;
+  let refreshTimer = null;
+  let countdownTimer = null;
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.add('show');
+  }
+  function clearError() {
+    errorBox.textContent = '';
+    errorBox.classList.remove('show');
+  }
+
+  function buildColIndex() {
+    colIndex = {};
+    headers.forEach(function (h, i) { colIndex[h] = i; });
+  }
+
+  function col(name) {
+    return colIndex[name] !== undefined ? colIndex[name] : -1;
+  }
+
+  function cell(row, name) {
+    const i = col(name);
+    return i >= 0 ? (row[i] || '') : '';
+  }
+
+  function loadData() {
+    configNote.style.display = 'none';
+    clearError();
+    tableContainer.innerHTML = '<div class="loading"><div class="spinner"></div>Memuat data...</div>';
+
+    if (!APPS_SCRIPT_URL) {
+      // Tidak ada backend -> baca dari localStorage.
+      const local = readLocalStorage();
+      if (local) {
+        headers = local.headers;
+        rows = local.rows;
+        buildColIndex();
+        populateFilters();
+        renderStats();
+        renderTable();
+        lastUpdated.textContent = 'Diperbarui: ' + new Date().toLocaleString('id-ID') + ' (localStorage)';
+        resetCountdown();
+      } else {
+        configNote.style.display = 'block';
+        statsEl.innerHTML = '';
+        tableContainer.innerHTML = '<div class="empty"><div class="icon">📋</div>Belum ada data. Isi APPS_SCRIPT_URL di config.js atau jalankan server.rb.</div>';
+        autoRefreshEl.textContent = '';
+      }
+      return;
+    }
+
+    fetch(APPS_SCRIPT_URL + (configured ? '?action=recap' : ''))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.ok) { throw new Error(data.error || 'Gagal memuat data'); }
+
+        // Dua format respons:
+        // 1) Google Apps Script: { ok, headers, rows }
+        // 2) Server lokal:       { ok, submissions }
+        if (Array.isArray(data.rows)) {
+          headers = data.headers || [];
+          rows = data.rows || [];
+        } else {
+          const flat = flattenSubmissions(data.submissions || []);
+          headers = flat.headers;
+          rows = flat.rows;
+        }
+
+        buildColIndex();
+        populateFilters();
+        renderStats();
+        renderTable();
+        lastUpdated.textContent = 'Diperbarui: ' + new Date().toLocaleString('id-ID');
+        resetCountdown();
+      })
+      .catch(function (err) {
+        // Backend tidak berjalan -> fallback ke localStorage.
+        const local = readLocalStorage();
+        if (local) {
+          headers = local.headers;
+          rows = local.rows;
+          buildColIndex();
+          populateFilters();
+          renderStats();
+          renderTable();
+          lastUpdated.textContent = 'Diperbarui: ' + new Date().toLocaleString('id-ID') + ' (localStorage)';
+          resetCountdown();
+          return;
+        }
+        showError('Gagal memuat data: ' + err.message + '. Pastikan APPS_SCRIPT_URL benar atau server.rb berjalan.');
+        tableContainer.innerHTML = '';
+        statsEl.innerHTML = '';
+        resetCountdown();
+      });
+  }
+
+  function flattenSubmissions(submissions) {
+    const headers = [
+      'Timestamp', 'Nama Lengkap', 'UPT / Instansi', 'Jabatan / Peran', 'Perangkat',
+      'Koneksi Internet', 'Pernah V1', 'Tujuan', 'Relevansi (1-5)', 'Performa Loading',
+      'Kemudahan Search (1-5)', 'Kemudahan Layers (1-5)', 'Kemudahan Legend (1-5)',
+      'Kemudahan Slider (1-5)', 'Fitur', 'Jenis Feedback', 'Deskripsi', 'Harapan',
+      'Urgensi', 'Lampiran', 'Prioritas', 'Dihubungi', 'Kontak'
+    ];
+
+    const rows = [];
+    submissions.forEach(function (sub) {
+      const d = sub.data || {};
+      const s1 = d.section1 || {};
+      const s2 = d.section2 || {};
+      const kem = s2.kemudahan || {};
+      const s4 = d.section4 || {};
+      const tujuan = Array.isArray(s2.tujuan) ? s2.tujuan.join(', ') : (s2.tujuan || '');
+      const feedbacks = d.section3 || [];
+
+      feedbacks.forEach(function (fb) {
+        rows.push([
+          sub.submittedAt || '',
+          s1.nama || '',
+          s1.upt || '',
+          s1.jabatan || '',
+          s1.perangkat || '',
+          s1.koneksi || '',
+          s1.pernah_v1 || '',
+          tujuan,
+          s2.relevansi || '',
+          s2.loading || '',
+          kem.search || '',
+          kem.layers || '',
+          kem.legend || '',
+          kem.slider || '',
+          fb.fitur || '',
+          fb.jenis_feedback || '',
+          fb.deskripsi || '',
+          fb.harapan || '',
+          fb.urgensi || '',
+          Array.isArray(fb.lampiran) ? fb.lampiran.join(', ') : (fb.lampiran || ''),
+          s4.prioritas || '',
+          s4.dihubungi || '',
+          s4.kontak || ''
+        ]);
+      });
+    });
+
+    return { headers: headers, rows: rows };
+  }
+
+  function readLocalStorage() {
+    try {
+      const KEY = 'inawis_feedback_submissions';
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      const submissions = JSON.parse(raw);
+      if (!Array.isArray(submissions) || submissions.length === 0) return null;
+      return flattenSubmissions(submissions);
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function resetCountdown() {
+    countdown = AUTO_REFRESH_SECONDS;
+    updateCountdownLabel();
+  }
+
+  function updateCountdownLabel() {
+    autoRefreshEl.textContent = 'Auto-refresh dalam ' + countdown + ' dtk';
+  }
+
+  function startAutoRefresh() {
+    if (refreshTimer) clearInterval(refreshTimer);
+    if (countdownTimer) clearInterval(countdownTimer);
+
+    refreshTimer = setInterval(function () {
+      loadData();
+    }, AUTO_REFRESH_SECONDS * 1000);
+
+    countdownTimer = setInterval(function () {
+      countdown -= 1;
+      if (countdown <= 0) countdown = AUTO_REFRESH_SECONDS;
+      updateCountdownLabel();
+    }, 1000);
+  }
+
+  function populateFilters() {
+    const fiturSel = document.getElementById('filter-fitur');
+    const jenisSel = document.getElementById('filter-jenis');
+    const urgensiSel = document.getElementById('filter-urgensi');
+
+    const fiturSet = new Set();
+    const jenisSet = new Set();
+    const urgensiSet = new Set();
+
+    rows.forEach(function (r) {
+      const f = cell(r, 'Fitur'); if (f) fiturSet.add(f);
+      const j = cell(r, 'Jenis Feedback'); if (j) jenisSet.add(j);
+      const u = cell(r, 'Urgensi'); if (u) urgensiSet.add(u);
+    });
+
+    fillSelect(fiturSel, fiturSet, 'Semua Fitur');
+    fillSelect(jenisSel, jenisSet, 'Semua Jenis');
+    fillSelect(urgensiSel, urgensiSet, 'Semua Urgensi');
+  }
+
+  function fillSelect(sel, values, placeholder) {
+    const current = sel.value;
+    sel.innerHTML = '<option value="">' + placeholder + '</option>';
+    Array.from(values).sort().forEach(function (v) {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      sel.appendChild(opt);
+    });
+    sel.value = current;
+  }
+
+  function renderStats() {
+    const total = rows.length;
+    const fiturCount = {};
+    const jenisCount = {};
+    const urgensiCount = {};
+
+    rows.forEach(function (r) {
+      const f = cell(r, 'Fitur') || '(kosong)';
+      const j = cell(r, 'Jenis Feedback') || '(kosong)';
+      const u = cell(r, 'Urgensi') || '(kosong)';
+      fiturCount[f] = (fiturCount[f] || 0) + 1;
+      jenisCount[j] = (jenisCount[j] || 0) + 1;
+      urgensiCount[u] = (urgensiCount[u] || 0) + 1;
+    });
+
+    const topFitur = topKey(fiturCount);
+    const topJenis = topKey(jenisCount);
+    const topUrgensi = topKey(urgensiCount);
+
+    statsEl.innerHTML =
+      statCard(total, 'Total Feedback') +
+      statCard(topFitur, 'Fitur Terbanyak') +
+      statCard(topJenis, 'Jenis Terbanyak') +
+      statCard(topUrgensi, 'Urgensi Terbanyak');
+  }
+
+  function topKey(obj) {
+    let best = '-';
+    let bestN = -1;
+    Object.keys(obj).forEach(function (k) {
+      if (obj[k] > bestN) { bestN = obj[k]; best = k; }
+    });
+    return best;
+  }
+
+  function statCard(num, label) {
+    return '<div class="stat-card"><div class="stat-num">' + escapeHtml(String(num)) + '</div><div class="stat-label">' + escapeHtml(label) + '</div></div>';
+  }
+
+  function renderTable() {
+    const fFitur = document.getElementById('filter-fitur').value;
+    const fJenis = document.getElementById('filter-jenis').value;
+    const fUrgensi = document.getElementById('filter-urgensi').value;
+    const fSearch = document.getElementById('filter-search').value.trim().toLowerCase();
+
+    const filtered = rows.filter(function (r) {
+      if (fFitur && cell(r, 'Fitur') !== fFitur) return false;
+      if (fJenis && cell(r, 'Jenis Feedback') !== fJenis) return false;
+      if (fUrgensi && cell(r, 'Urgensi') !== fUrgensi) return false;
+      if (fSearch) {
+        const hay = [cell(r, 'Nama Lengkap'), cell(r, 'UPT / Instansi'), cell(r, 'Deskripsi'), cell(r, 'Fitur'), cell(r, 'Harapan')]
+          .join(' ').toLowerCase();
+        if (hay.indexOf(fSearch) === -1) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      tableContainer.innerHTML = '<div class="empty"><div class="icon">🔍</div>Tidak ada feedback yang cocok dengan filter.</div>';
+      return;
+    }
+
+    // Kolom yang ditampilkan (urutan ringkas untuk recap)
+    const displayCols = [
+      'Timestamp', 'Nama Lengkap', 'UPT / Instansi', 'Fitur', 'Jenis Feedback',
+      'Urgensi', 'Deskripsi', 'Harapan', 'Prioritas', 'Kontak'
+    ];
+
+    let html = '<table><thead><tr>';
+    displayCols.forEach(function (name) {
+      html += '<th>' + escapeHtml(name) + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+
+    filtered.forEach(function (r) {
+      html += '<tr>';
+      displayCols.forEach(function (name) {
+        const val = cell(r, name);
+        html += '<td>' + formatCell(name, val) + '</td>';
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    tableContainer.innerHTML = html;
+  }
+
+  function formatCell(name, val) {
+    if (!val) return '<span style="color:#b6c2cf;">—</span>';
+    if (name === 'Urgensi') {
+      const cls = val.indexOf('Tinggi') === 0 ? 'badge-tinggi'
+        : val.indexOf('Sedang') === 0 ? 'badge-sedang'
+        : val.indexOf('Rendah') === 0 ? 'badge-rendah' : '';
+      return '<span class="badge ' + cls + '">' + escapeHtml(val) + '</span>';
+    }
+    if (name === 'Jenis Feedback') {
+      const cls = val.indexOf('Bug') === 0 ? 'badge-bug'
+        : val.indexOf('Data') === 0 ? 'badge-data'
+        : val.indexOf('Usability') === 0 ? 'badge-usability'
+        : val.indexOf('Feature') === 0 ? 'badge-request' : '';
+      return '<span class="badge ' + cls + '">' + escapeHtml(val) + '</span>';
+    }
+    if (name === 'Timestamp') {
+      // Format tanggal jika berupa Date/string
+      return escapeHtml(formatTimestamp(val));
+    }
+    return escapeHtml(val);
+  }
+
+  function formatTimestamp(val) {
+    if (val instanceof Date) return val.toLocaleString('id-ID');
+    if (typeof val === 'string') {
+      const d = new Date(val);
+      if (!isNaN(d.getTime())) return d.toLocaleString('id-ID');
+    }
+    return val;
+  }
+
+  function exportCSV() {
+    if (rows.length === 0) { alert('Tidak ada data untuk diekspor.'); return; }
+    const allCols = headers;
+    let csv = allCols.map(csvEscape).join(',') + '\n';
+    rows.forEach(function (r) {
+      csv += allCols.map(function (name) {
+        const i = col(name);
+        return csvEscape(i >= 0 ? (r[i] || '') : '');
+      }).join(',') + '\n';
+    });
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'inawis_feedback_recap.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function csvEscape(v) {
+    const s = String(v == null ? '' : v);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  document.getElementById('btn-refresh').addEventListener('click', loadData);
+  document.getElementById('btn-export').addEventListener('click', exportCSV);
+
+  // Muat otomatis saat halaman dibuka, lalu refresh berkala
+  loadData();
+  startAutoRefresh();
+})();
+</script>
+</body>
+</html>

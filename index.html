@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InaWIS V2 Soft Launch — Formulir Evaluasi</title>
+<style>
+  :root {
+    --navy: #0b3d66;
+    --navy-dark: #072c4a;
+    --teal: #00a8cc;
+    --teal-light: #e6f7fb;
+    --bg: #f2f6fa;
+    --card: #ffffff;
+    --text: #1f2d3d;
+    --muted: #6b7a8d;
+    --border: #dbe4ee;
+    --danger: #d64545;
+    --success: #1f9d55;
+    --radius: 12px;
+    --shadow: 0 2px 10px rgba(11, 61, 102, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Segoe UI", "Inter", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .topbar {
+    background: linear-gradient(135deg, var(--navy-dark), var(--navy) 55%, #0e5a8a);
+    color: #fff;
+    padding: 22px 20px 18px;
+  }
+  .topbar-inner { max-width: 860px; margin: 0 auto; }
+  .topbar .brand {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
+  }
+  .topbar .logo {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--teal); display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px; letter-spacing: 0.5px; color: #fff;
+  }
+  .topbar h1 { font-size: 1.35rem; font-weight: 700; line-height: 1.25; }
+  .topbar .subtitle { font-size: 0.9rem; opacity: 0.9; margin-top: 2px; }
+
+  .progress-wrap {
+    max-width: 860px; margin: 0 auto; padding: 18px 20px 0;
+  }
+  .progress-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.82rem; color: var(--muted); margin-bottom: 8px;
+  }
+  .progress-meta .pct { font-weight: 700; color: var(--navy); }
+  .progress-track {
+    height: 8px; background: #dde6ef; border-radius: 999px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, var(--teal), #2fc4e0);
+    border-radius: 999px; transition: width 0.35s ease;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 20px; }
+
+  .form-section {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 26px;
+    animation: fadeIn 0.25s ease;
+  }
+  .form-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .section-head { margin-bottom: 22px; }
+  .section-head .kicker {
+    display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--teal); background: var(--teal-light);
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 8px;
+  }
+  .section-head h2 { font-size: 1.25rem; font-weight: 700; color: var(--navy); }
+  .section-head p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+  .field { margin-bottom: 24px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label.q {
+    display: block; font-weight: 600; font-size: 0.98rem; margin-bottom: 8px;
+  }
+  .field .req { color: var(--danger); font-weight: 700; margin-left: 2px; }
+  .field .hint { font-size: 0.82rem; color: var(--muted); margin-top: 4px; }
+
+  input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+    width: 100%; padding: 11px 13px; font-size: 0.95rem; font-family: inherit;
+    border: 1.5px solid var(--border); border-radius: 8px; background: #fff; color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.15);
+  }
+  textarea { resize: vertical; min-height: 96px; }
+  input.invalid, select.invalid, textarea.invalid { border-color: var(--danger); }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px;
+    border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .option:hover { border-color: var(--teal); background: var(--teal-light); }
+  .option input { margin-top: 3px; accent-color: var(--teal); }
+  .option .opt-text { font-size: 0.94rem; }
+
+  .scale {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .scale .scale-item {
+    flex: 1; min-width: 52px; text-align: center; cursor: pointer;
+  }
+  .scale .scale-item input { display: none; }
+  .scale .scale-item .num {
+    display: block; padding: 10px 0; border: 1.5px solid var(--border); border-radius: 8px;
+    font-weight: 700; font-size: 1rem; color: var(--navy); transition: all 0.15s;
+  }
+  .scale .scale-item input:checked + .num {
+    background: var(--navy); color: #fff; border-color: var(--navy);
+  }
+  .scale .scale-item .cap { display: block; font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+  .scale-labels { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+
+  .grid-table { width: 100%; border-collapse: collapse; }
+  .grid-table th, .grid-table td { padding: 10px 8px; text-align: center; border-bottom: 1px solid var(--border); }
+  .grid-table th { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+  .grid-table td.row-label { text-align: left; font-size: 0.9rem; font-weight: 500; width: 46%; }
+  .grid-table input[type="radio"] { accent-color: var(--teal); width: 16px; height: 16px; }
+
+  .conditional { display: none; margin-top: 12px; padding-left: 14px; border-left: 3px solid var(--teal); }
+  .conditional.show { display: block; }
+
+  .nav-buttons {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 26px; gap: 12px;
+  }
+  .btn {
+    padding: 12px 22px; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s; font-family: inherit;
+  }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: var(--navy-dark); }
+  .btn-secondary { background: #fff; color: var(--navy); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--navy); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .error-msg {
+    display: none; color: var(--danger); font-size: 0.85rem; margin-top: 12px;
+    background: #fdecec; border: 1px solid #f5c6c6; padding: 10px 12px; border-radius: 8px;
+  }
+  .error-msg.show { display: block; }
+
+  .info-msg {
+    display: none; color: var(--navy); font-size: 0.85rem; margin-top: 12px;
+    background: var(--teal-light); border: 1px solid #bfe7f0; padding: 10px 12px; border-radius: 8px;
+  }
+  .info-msg.show { display: block; }
+
+  .saved-list {
+    margin-top: 12px; padding: 0; list-style: none;
+  }
+  .saved-list li {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    background: #fbfdff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; margin-bottom: 6px; font-size: 0.85rem;
+  }
+  .saved-list li .saved-label { color: var(--text); }
+  .saved-list li .saved-label strong { color: var(--navy); }
+  .saved-list li .btn-remove {
+    background: none; border: none; color: var(--danger); cursor: pointer;
+    font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 6px; flex-shrink: 0;
+  }
+  .saved-list li .btn-remove:hover { background: #fdecec; }
+
+  .success-screen {
+    display: none; text-align: center; padding: 40px 20px;
+  }
+  .success-screen.show { display: block; }
+  .success-screen .check {
+    width: 72px; height: 72px; border-radius: 50%; background: #e3f7ec;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
+    font-size: 34px; color: var(--success);
+  }
+  .success-screen h2 { color: var(--navy); margin-bottom: 8px; }
+  .success-screen p { color: var(--muted); max-width: 520px; margin: 0 auto 20px; }
+
+  .summary {
+    text-align: left; background: #fbfdff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px; margin-top: 20px; max-height: 360px; overflow: auto;
+  }
+  .summary pre { font-size: 0.8rem; white-space: pre-wrap; word-break: break-word; color: var(--text); }
+
+  .footer-note {
+    text-align: center; color: var(--muted); font-size: 0.78rem; margin: 18px 0 30px;
+  }
+
+  @media (max-width: 600px) {
+    .form-section { padding: 20px 16px; }
+    .grid-table td.row-label { width: 40%; font-size: 0.82rem; }
+    .scale { gap: 5px; }
+    .scale .scale-item { min-width: 44px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="logo">IW</div>
+      <div>
+        <h1>InaWIS V2 Soft Launch</h1>
+        <div class="subtitle">Formulir Evaluasi &amp; Umpan Balik Pengguna</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="progress-label">Bagian 1 dari 5</span>
+    <span class="pct" id="progress-pct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<div class="container">
+  <form id="inawis-form" novalidate>
+
+    <!-- ============ SECTION 1 ============ -->
+    <section class="form-section active" data-section="1">
+      <div class="section-head">
+        <span class="kicker">Bagian 1</span>
+        <h2>Informasi Pengguna &amp; Konteks Akses</h2>
+        <p>Mohon lengkapi identitas dan konteks akses Anda selama pengujian.</p>
+      </div>
+
+      <div class="field">
+        <label class="q" for="nama">1. Nama Lengkap<span class="req">*</span></label>
+        <input type="text" id="nama" name="nama" placeholder="Nama lengkap Anda" required>
+      </div>
+
+      <div class="field">
+        <label class="q" for="upt">2. Unit Pelaksana Teknis (UPT) / Instansi<span class="req">*</span></label>
+        <select id="upt" name="upt" required>
+          <option value="" disabled selected>-- Pilih UPT / Instansi --</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Priok</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Emas</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Perak</option>
+          <option>Stasiun Meteorologi Maritim Belawan</option>
+          <option>Stasiun Meteorologi Maritim Makassar</option>
+          <option>Stasiun Meteorologi Maritim Bitung</option>
+          <option>Stasiun Meteorologi Maritim Ambon</option>
+          <option>Stasiun Meteorologi Maritim Serang</option>
+          <option>Stasiun Meteorologi Maritim Cilacap</option>
+          <option>Stasiun Meteorologi Maritim Pontianak</option>
+          <option>Stasiun Meteorologi Maritim Banjarmasin</option>
+          <option>Stasiun Meteorologi Maritim Kendari</option>
+          <option>Stasiun Meteorologi Maritim Kupang</option>
+          <option>Stasiun Meteorologi Maritim Sorong</option>
+          <option>Stasiun Meteorologi Maritim Jayapura</option>
+          <option>Stasiun Meteorologi Maritim Tual</option>
+          <option>Stasiun Meteorologi Maritim Merauke</option>
+          <option>Stasiun Meteorologi Maritim Ternate</option>
+          <option>Stasiun Meteorologi Maritim Padang</option>
+          <option>Stasiun Meteorologi Maritim Dumai</option>
+          <option>Stasiun Meteorologi Maritim Batam</option>
+          <option>Stasiun Meteorologi Maritim Palembang</option>
+          <option>Stasiun Meteorologi Maritim Lampung</option>
+          <option>Stasiun Meteorologi Maritim Balikpapan</option>
+          <option>Stasiun Meteorologi Maritim Tarakan</option>
+          <option>Stasiun Meteorologi Maritim Manado</option>
+          <option>Stasiun Meteorologi Maritim Gorontalo</option>
+          <option>Stasiun Meteorologi Maritim Palu</option>
+          <option>Stasiun Meteorologi Maritim Denpasar</option>
+          <option>Stasiun Meteorologi Maritim Mataram</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Balai Karimun</option>
+          <option>Stasiun Meteorologi Maritim Bengkulu</option>
+          <option>Stasiun Meteorologi Maritim Pangkal Pinang</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Pinang</option>
+          <option>Stasiun Meteorologi Maritim Banda Aceh</option>
+          <option>Stasiun Meteorologi Maritim Sabang</option>
+          <option>Stasiun Meteorologi Maritim Sibolga</option>
+          <option>Stasiun Meteorologi Maritim Pekanbaru</option>
+          <option>Stasiun Meteorologi Maritim Jambi</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Pandan</option>
+          <option>Stasiun Meteorologi Maritim Samarinda</option>
+          <option>Stasiun Meteorologi Maritim Nunukan</option>
+          <option>Stasiun Meteorologi Maritim Tahuna</option>
+          <option>Stasiun Meteorologi Maritim Toli-Toli</option>
+          <option>Stasiun Meteorologi Maritim Luwuk</option>
+          <option>Stasiun Meteorologi Maritim Bau-Bau</option>
+          <option>Stasiun Meteorologi Maritim Bima</option>
+          <option>Stasiun Meteorologi Maritim Waingapu</option>
+          <option>Stasiun Meteorologi Maritim Maumere</option>
+          <option>Stasiun Meteorologi Maritim Labuan Bajo</option>
+          <option>Stasiun Meteorologi Maritim Manokwari</option>
+          <option>Stasiun Meteorologi Maritim Biak</option>
+          <option>Stasiun Meteorologi Maritim Nabire</option>
+          <option>Stasiun Meteorologi Maritim Timika</option>
+          <option>Stasiun Meteorologi Maritim Natuna</option>
+          <option>Stasiun Meteorologi Maritim Ranai</option>
+          <option>Stasiun Meteorologi Maritim Tarempa</option>
+          <option>Stasiun Meteorologi Maritim Dabo Singkep</option>
+          <option>Stasiun Meteorologi Maritim Selat Panjang</option>
+          <option>Stasiun Meteorologi Maritim Tembilahan</option>
+          <option>Stasiun Meteorologi Maritim Bengkalis</option>
+          <option>Stasiun Meteorologi Maritim Meulaboh</option>
+          <option>Stasiun Meteorologi Maritim Sinabang</option>
+          <option>Stasiun Meteorologi Maritim Tapaktuan</option>
+          <option>Stasiun Meteorologi Maritim Krui</option>
+          <option>Stasiun Meteorologi Maritim Enggano</option>
+          <option>Stasiun Meteorologi Maritim Pulau Baai</option>
+          <option>Stasiun Meteorologi Maritim Pariaman</option>
+          <option>Stasiun Meteorologi Maritim Painan</option>
+          <option>Stasiun Meteorologi Maritim Teluk Bayur</option>
+          <option>Stasiun Meteorologi Maritim Sikakap</option>
+          <option>Stasiun Meteorologi Maritim Tuapejat</option>
+          <option>Stasiun Meteorologi Maritim Muara Siberut</option>
+          <option>Stasiun Meteorologi Maritim Tello</option>
+          <option>Stasiun Meteorologi Maritim Sipora</option>
+          <option>Stasiun Meteorologi Maritim Sikabaluan</option>
+          <option>Stasiun Meteorologi Maritim Muara Padang</option>
+          <option>Stasiun Meteorologi Maritim Carocok</option>
+          <option>Stasiun Meteorologi Maritim Sasak</option>
+          <option>Stasiun Meteorologi Maritim Air Haji</option>
+          <option>Stasiun Meteorologi Maritim Indrapura</option>
+          <option>Stasiun Meteorologi Maritim Tapan</option>
+          <option>Stasiun Meteorologi Maritim Sungai Penuh</option>
+          <option>Stasiun Meteorologi Maritim Kerinci</option>
+          <option>Stasiun Meteorologi Maritim Muara Bungo</option>
+          <option>Stasiun Meteorologi Maritim Muara Tebo</option>
+          <option>Stasiun Meteorologi Maritim Sarolangun</option>
+          <option>Stasiun Meteorologi Maritim Muara Bulian</option>
+          <option>Stasiun Meteorologi Maritim Kuala Tungkal</option>
+          <option>Stasiun Meteorologi Maritim Nipah Panjang</option>
+          <option>Stasiun Meteorologi Maritim Kuala Jambi</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Jabung</option>
+          <option>Stasiun Meteorologi Maritim Muara Sabak</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Jabung Timur</option>
+          <option>Stasiun Meteorologi Maritim Tanjung Jabung Barat</option>
+          <option>Stasiun Meteorologi Maritim Muaro Jambi</option>
+          <option>Stasiun Meteorologi Maritim Kota Jambi</option>
+          <option>Stasiun Meteorologi Maritim Batanghari</option>
+          <option>Stasiun Meteorologi Maritim Bungo</option>
+          <option>Stasiun Meteorologi Maritim Tebo</option>
+          <option>Stasiun Meteorologi Maritim Merangin</option>
+          <option value="__lainnya__">Lainnya</option>
+        </select>
+        <div class="conditional" id="upt-lainnya-wrap">
+          <input type="text" id="upt-lainnya" name="upt_lainnya" placeholder="Sebutkan UPT / Instansi Anda">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="jabatan">3. Jabatan / Peran Operasional<span class="req">*</span></label>
+        <input type="text" id="jabatan" name="jabatan" placeholder="Contoh: Prakirawan, Forecaster, Operator, dll." required>
+      </div>
+
+      <div class="field">
+        <label class="q">4. Perangkat utama apa yang Anda gunakan untuk mengakses InaWIS V2 saat pengujian ini?<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="perangkat" value="Desktop / Laptop" required><span class="opt-text">Desktop / Laptop</span></label>
+          <label class="option"><input type="radio" name="perangkat" value="Tablet"><span class="opt-text">Tablet</span></label>
+          <label class="option"><input type="radio" name="perangkat" value="Mobile Phone / Smartphone"><span class="opt-text">Mobile Phone / Smartphone</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q">5. Bagaimana kondisi koneksi internet Anda saat mengakses?<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="koneksi" value="Cepat & Stabil (Broadband/Wi-Fi Kantor)" required><span class="opt-text">Cepat &amp; Stabil (Broadband/Wi-Fi Kantor)</span></label>
+          <label class="option"><input type="radio" name="koneksi" value="Sedang (Jaringan Seluler 4G)"><span class="opt-text">Sedang (Jaringan Seluler 4G)</span></label>
+          <label class="option"><input type="radio" name="koneksi" value="Lambat / Sering Terputus (Kondisi Lapangan/Pelabuhan)"><span class="opt-text">Lambat / Sering Terputus (Kondisi Lapangan/Pelabuhan)</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q">6. Apakah Bapak/Ibu pernah menggunakan InaWIS V1 sebelumnya?<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="pernah_v1" value="Ya" required><span class="opt-text">Ya</span></label>
+          <label class="option"><input type="radio" name="pernah_v1" value="Tidak"><span class="opt-text">Tidak</span></label>
+        </div>
+        <div class="hint">Jika "Ya", Anda akan diarahkan ke Bagian 4 untuk perbandingan V1 vs V2.</div>
+      </div>
+
+      <div class="nav-buttons">
+        <span></span>
+        <button type="button" class="btn btn-primary" onclick="nextSection()">Berikutnya</button>
+      </div>
+      <div class="error-msg" id="err-1"></div>
+    </section>
+
+    <!-- ============ SECTION 2 ============ -->
+    <section class="form-section" data-section="2">
+      <div class="section-head">
+        <span class="kicker">Bagian 2</span>
+        <h2>Pengalaman Penggunaan &amp; Performa Fitur</h2>
+        <p>Berikan penilaian Anda terhadap pengalaman penggunaan InaWIS V2.</p>
+      </div>
+
+      <div class="field">
+        <label class="q">1. Apa tujuan utama Bapak/Ibu menggunakan InaWIS V2 pada sesi ini?<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="checkbox" name="tujuan" value="Pemantauan kondisi cuaca maritim / gelombang"><span class="opt-text">Pemantauan kondisi cuaca maritim / gelombang</span></label>
+          <label class="option"><input type="checkbox" name="tujuan" value="Pemantauan kapal (Vessels/AIS)"><span class="opt-text">Pemantauan kapal (Vessels/AIS)</span></label>
+          <label class="option"><input type="checkbox" name="tujuan" value="Informasi risiko cuaca maritim (Risk)"><span class="opt-text">Informasi risiko cuaca maritim (Risk)</span></label>
+          <label class="option"><input type="checkbox" name="tujuan" value="Perencanaan rute pelayaran (Route Planner)"><span class="opt-text">Perencanaan rute pelayaran (Route Planner)</span></label>
+          <label class="option"><input type="checkbox" name="tujuan" value="__lainnya__"><span class="opt-text">Lainnya:</span></label>
+        </div>
+        <div class="conditional" id="tujuan-lainnya-wrap">
+          <input type="text" id="tujuan-lainnya" name="tujuan_lainnya" placeholder="Sebutkan tujuan lainnya">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q">2. Seberapa relevan informasi yang disajikan InaWIS V2 dengan kebutuhan operasional harian Bapak/Ibu?<span class="req">*</span></label>
+        <div class="scale" data-scale="relevansi">
+          <label class="scale-item"><input type="radio" name="relevansi" value="1" required><span class="num">1</span></label>
+          <label class="scale-item"><input type="radio" name="relevansi" value="2"><span class="num">2</span></label>
+          <label class="scale-item"><input type="radio" name="relevansi" value="3"><span class="num">3</span></label>
+          <label class="scale-item"><input type="radio" name="relevansi" value="4"><span class="num">4</span></label>
+          <label class="scale-item"><input type="radio" name="relevansi" value="5"><span class="num">5</span></label>
+        </div>
+        <div class="scale-labels"><span>1 = Sangat Tidak Relevan</span><span>5 = Sangat Relevan</span></div>
+      </div>
+
+      <div class="field">
+        <label class="q">3. Bagaimana performa loading (pemuatan) peta dan data layer pada perangkat Anda?<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="loading" value="Sangat cepat dan lancar" required><span class="opt-text">Sangat cepat dan lancar</span></label>
+          <label class="option"><input type="radio" name="loading" value="Cukup baik / Dapat diterima"><span class="opt-text">Cukup baik / Dapat diterima</span></label>
+          <label class="option"><input type="radio" name="loading" value="Lambat dan patah-patah (lagging)"><span class="opt-text">Lambat dan patah-patah (lagging)</span></label>
+          <label class="option"><input type="radio" name="loading" value="Gagal memuat / Error"><span class="opt-text">Gagal memuat / Error</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q">4. Evaluasi Kemudahan Fitur Utama<span class="req">*</span></label>
+        <div class="hint" style="margin-bottom:10px;">Beri nilai 1–5 untuk setiap fitur (1 = Sangat Sulit, 5 = Sangat Mudah).</div>
+        <table class="grid-table">
+          <thead>
+            <tr>
+              <th class="row-label" style="text-align:left;">Fitur</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-label">Kemudahan mencari lokasi menggunakan alat Search (Vessel, Port, Coordinates)</td>
+              <td><input type="radio" name="grid_search" value="1" required></td>
+              <td><input type="radio" name="grid_search" value="2"></td>
+              <td><input type="radio" name="grid_search" value="3"></td>
+              <td><input type="radio" name="grid_search" value="4"></td>
+              <td><input type="radio" name="grid_search" value="5"></td>
+            </tr>
+            <tr>
+              <td class="row-label">Kemudahan mengganti dan membaca "Weather Map Layers" &amp; "Maritime Layers"</td>
+              <td><input type="radio" name="grid_layers" value="1" required></td>
+              <td><input type="radio" name="grid_layers" value="2"></td>
+              <td><input type="radio" name="grid_layers" value="3"></td>
+              <td><input type="radio" name="grid_layers" value="4"></td>
+              <td><input type="radio" name="grid_layers" value="5"></td>
+            </tr>
+            <tr>
+              <td class="row-label">Kejelasan skala warna (Legend) pada Peta (misal: Significant Wave Height)</td>
+              <td><input type="radio" name="grid_legend" value="1" required></td>
+              <td><input type="radio" name="grid_legend" value="2"></td>
+              <td><input type="radio" name="grid_legend" value="3"></td>
+              <td><input type="radio" name="grid_legend" value="4"></td>
+              <td><input type="radio" name="grid_legend" value="5"></td>
+            </tr>
+            <tr>
+              <td class="row-label">Kemudahan menggunakan "Forecast Time Slider / Playback" untuk prediksi cuaca ke depan</td>
+              <td><input type="radio" name="grid_slider" value="1" required></td>
+              <td><input type="radio" name="grid_slider" value="2"></td>
+              <td><input type="radio" name="grid_slider" value="3"></td>
+              <td><input type="radio" name="grid_slider" value="4"></td>
+              <td><input type="radio" name="grid_slider" value="5"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="nav-buttons">
+        <button type="button" class="btn btn-secondary" onclick="prevSection()">Kembali</button>
+        <button type="button" class="btn btn-primary" onclick="nextSection()">Berikutnya</button>
+      </div>
+      <div class="error-msg" id="err-2"></div>
+    </section>
+
+    <!-- ============ SECTION 3 ============ -->
+    <section class="form-section" data-section="3">
+      <div class="section-head">
+        <span class="kicker">Bagian 3</span>
+        <h2>Pencatatan Temuan (Feedback &amp; Issue Tracker)</h2>
+        <p>Laporkan kendala atau masukan spesifik yang Anda temukan.</p>
+      </div>
+
+      <div class="field">
+        <label class="q" for="fitur">1. Fitur InaWIS V2 mana yang ingin dievaluasi/dilaporkan saat ini?<span class="req">*</span></label>
+        <select id="fitur" name="fitur" required>
+          <option value="" disabled selected>-- Pilih Fitur --</option>
+          <option>Weather Map</option>
+          <option>Satellite</option>
+          <option>Port</option>
+          <option>Vessels (AIS)</option>
+          <option>Fishing Ground</option>
+          <option>Risk</option>
+          <option>Route Planner</option>
+          <option>Observation Network</option>
+          <option>Tampilan &amp; Navigasi</option>
+          <option value="__lainnya__">Lainnya</option>
+        </select>
+        <div class="conditional" id="fitur-lainnya-wrap">
+          <input type="text" id="fitur-lainnya" name="fitur_lainnya" placeholder="Sebutkan fitur lainnya">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q">2. Jenis feedback yang ingin disampaikan:<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="jenis_feedback" value="Bug / Error (Fitur rusak/gagal)" required><span class="opt-text">Bug / Error (Fitur rusak/gagal)</span></label>
+          <label class="option"><input type="radio" name="jenis_feedback" value="Data Issue (Data tidak akurat / tidak terbarui)"><span class="opt-text">Data Issue (Data tidak akurat / tidak terbarui)</span></label>
+          <label class="option"><input type="radio" name="jenis_feedback" value="Usability (Sulit digunakan / membingungkan)"><span class="opt-text">Usability (Sulit digunakan / membingungkan)</span></label>
+          <label class="option"><input type="radio" name="jenis_feedback" value="Feature Request / Improvement (Saran perbaikan/fitur baru)"><span class="opt-text">Feature Request / Improvement (Saran perbaikan/fitur baru)</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="deskripsi">3. Deskripsi Kendala atau Masukan (Mohon jelaskan secara spesifik):<span class="req">*</span></label>
+        <textarea id="deskripsi" name="deskripsi" placeholder="Jelaskan kendala/masukan secara spesifik..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label class="q" for="harapan">4. Bagaimana kondisi atau hasil yang diharapkan?</label>
+        <textarea id="harapan" name="harapan" placeholder="(Opsional) Jelaskan kondisi/hasil yang Anda harapkan..."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="q">5. Tingkat Urgensi Temuan Ini:<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="urgensi" value="Tinggi (Menghambat operasional/informasi salah)" required><span class="opt-text">Tinggi (Menghambat operasional/informasi salah)</span></label>
+          <label class="option"><input type="radio" name="urgensi" value="Sedang (Mengurangi kenyamanan)"><span class="opt-text">Sedang (Mengurangi kenyamanan)</span></label>
+          <label class="option"><input type="radio" name="urgensi" value="Rendah (Saran penyempurnaan/kosmetik)"><span class="opt-text">Rendah (Saran penyempurnaan/kosmetik)</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="q" for="lampiran">6. Lampiran Screenshot/Bukti Kendala:</label>
+        <input type="file" id="lampiran" name="lampiran" accept="image/*" multiple>
+        <div class="hint">(Opsional) Unggah screenshot atau bukti kendala. Format gambar.</div>
+      </div>
+
+      <div class="field">
+        <label class="q">7. Apakah Anda ingin mereview fitur lainnya kembali selain yang telah disampaikan?<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="review_lagi" value="Ya" required><span class="opt-text">Ya</span></label>
+          <label class="option"><input type="radio" name="review_lagi" value="Tidak"><span class="opt-text">Tidak</span></label>
+        </div>
+      </div>
+
+      <div class="info-msg" id="saved-info"></div>
+      <ul class="saved-list" id="saved-list"></ul>
+
+      <div class="nav-buttons">
+        <button type="button" class="btn btn-secondary" onclick="prevSection()">Kembali</button>
+        <button type="button" class="btn btn-primary" onclick="nextSection()">Berikutnya</button>
+      </div>
+      <div class="error-msg" id="err-3"></div>
+    </section>
+
+    <!-- ============ SECTION 4 ============ -->
+    <section class="form-section" data-section="4">
+      <div class="section-head">
+        <span class="kicker">Bagian 4</span>
+        <h2>Kesimpulan &amp; Penutup</h2>
+        <p>Langkah terakhir sebelum mengirimkan evaluasi Anda.</p>
+      </div>
+
+      <div class="field">
+        <label class="q" for="prioritas">1. Secara keseluruhan, apa SATU fitur atau data yang paling perlu diprioritaskan oleh tim developer untuk diperbaiki sebelum peluncuran resmi?<span class="req">*</span></label>
+        <textarea id="prioritas" name="prioritas" placeholder="Sebutkan satu fitur/data prioritas..." required></textarea>
+      </div>
+
+      <div class="field">
+        <label class="q">2. Apakah Bapak/Ibu bersedia dihubungi oleh Tim InaWIS untuk diskusi/klarifikasi teknis terkait masukan ini?<span class="req">*</span></label>
+        <div class="options">
+          <label class="option"><input type="radio" name="dihubungi" value="Ya" required><span class="opt-text">Ya (Mohon tuliskan No. WhatsApp/Email aktif di bawah)</span></label>
+          <label class="option"><input type="radio" name="dihubungi" value="Tidak"><span class="opt-text">Tidak</span></label>
+        </div>
+      </div>
+
+      <div class="field conditional" id="kontak-wrap">
+        <label class="q" for="kontak">3. Kontak (WhatsApp/Email):</label>
+        <input type="text" id="kontak" name="kontak" placeholder="Contoh: 0812xxxxxxx atau nama@email.com">
+      </div>
+
+      <div class="nav-buttons">
+        <button type="button" class="btn btn-secondary" onclick="prevSection()">Kembali</button>
+        <button type="submit" class="btn btn-primary">Kirim Formulir</button>
+      </div>
+      <div class="error-msg" id="err-4"></div>
+    </section>
+
+  </form>
+
+  <!-- Success screen -->
+  <div class="success-screen" id="success-screen">
+    <div class="check">✓</div>
+    <h2>Terima kasih atas kontribusi Anda!</h2>
+    <p>Formulir evaluasi InaWIS V2 Anda telah berhasil dikirim. Anda dapat mengirimkan form ini kembali kapan saja selama masa pengujian jika menemukan kendala pada fitur yang berbeda.</p>
+    <button type="button" class="btn btn-primary" onclick="resetForm()">Kirim Respons Lain</button>
+    <div class="summary" id="summary-box" style="display:none;">
+      <strong style="color:var(--navy);">Ringkasan Respons (JSON):</strong>
+      <pre id="summary-json"></pre>
+    </div>
+  </div>
+
+  <div class="footer-note">InaWIS V2 Soft Launch — Formulir Evaluasi Pengguna · UPT Meteorologi Maritim</div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const sections = Array.from(document.querySelectorAll('.form-section'));
+  const totalSections = 4;
+  let current = 0;
+  const savedFeedbacks = [];
+
+  const progressLabel = document.getElementById('progress-label');
+  const progressPct = document.getElementById('progress-pct');
+  const progressFill = document.getElementById('progress-fill');
+
+  const sectionTitles = [
+    'Informasi Pengguna & Konteks Akses',
+    'Pengalaman Penggunaan & Performa Fitur',
+    'Pencatatan Temuan',
+    'Kesimpulan & Penutup'
+  ];
+
+  function updateProgress() {
+    const pct = Math.round((current / (totalSections - 1)) * 100);
+    progressLabel.textContent = 'Bagian ' + (current + 1) + ' dari ' + totalSections;
+    progressPct.textContent = pct + '%';
+    progressFill.style.width = pct + '%';
+  }
+
+  function showSection(index) {
+    sections.forEach(function (s, i) {
+      s.classList.toggle('active', i === index);
+    });
+    current = index;
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setError(sectionIndex, message) {
+    const el = document.getElementById('err-' + (sectionIndex + 1));
+    if (el) {
+      el.textContent = message || '';
+      el.classList.toggle('show', !!message);
+    }
+  }
+
+  function markInvalid(inputs) {
+    inputs.forEach(function (inp) {
+      inp.classList.add('invalid');
+      inp.addEventListener('input', function clear() {
+        inp.classList.remove('invalid');
+        inp.removeEventListener('input', clear);
+      });
+      inp.addEventListener('change', function clear() {
+        inp.classList.remove('invalid');
+        inp.removeEventListener('change', clear);
+      });
+    });
+  }
+
+  function validateSection(index) {
+    const section = sections[index];
+    const missing = [];
+
+    // Text inputs / selects / textareas with required
+    section.querySelectorAll('input[required], select[required], textarea[required]').forEach(function (inp) {
+      if (inp.type === 'radio') return; // handled per-group below
+      if (inp.type === 'checkbox') return;
+      if (!inp.value || !inp.value.trim()) {
+        missing.push(inp);
+      }
+    });
+
+    // Radio groups (collect all radios, then check required groups)
+    const radioGroups = {};
+    section.querySelectorAll('input[type="radio"]').forEach(function (r) {
+      radioGroups[r.name] = radioGroups[r.name] || [];
+      radioGroups[r.name].push(r);
+    });
+    Object.keys(radioGroups).forEach(function (name) {
+      const group = radioGroups[name];
+      const isRequired = group.some(function (r) { return r.required; });
+      if (!isRequired) return;
+      const checked = group.some(function (r) { return r.checked; });
+      if (!checked) {
+        group.forEach(function (r) { missing.push(r); });
+      }
+    });
+
+    // Checkbox groups (tujuan)
+    section.querySelectorAll('input[type="checkbox"][required]').forEach(function (c) {
+      const group = section.querySelectorAll('input[type="checkbox"][name="' + c.name + '"]');
+      const anyChecked = Array.from(group).some(function (x) { return x.checked; });
+      if (!anyChecked) {
+        group.forEach(function (x) { missing.push(x); });
+      }
+    });
+
+    if (missing.length > 0) {
+      markInvalid(missing);
+      setError(index, 'Mohon lengkapi semua kolom wajib (bertanda *) sebelum melanjutkan.');
+      return false;
+    }
+    setError(index, '');
+    return true;
+  }
+
+  window.nextSection = function () {
+    if (!validateSection(current)) return;
+
+    // Section 3: handle "review another feature?" repeat logic
+    if (current === 2) {
+      const reviewLagi = document.querySelector('input[name="review_lagi"]:checked');
+      if (reviewLagi && reviewLagi.value === 'Ya') {
+        saveCurrentFeedback();
+        resetSection3Fields();
+        showSection(2); // stay on Section 3 for another review
+        return;
+      }
+    }
+
+    if (current < totalSections - 1) {
+      showSection(current + 1);
+    }
+  };
+
+  window.prevSection = function () {
+    if (current > 0) showSection(current - 1);
+  };
+
+  // ---- Section 3: repeatable feedback ----
+  function readSection3() {
+    return {
+      fitur: document.getElementById('fitur').value === '__lainnya__'
+        ? document.getElementById('fitur-lainnya').value.trim()
+        : document.getElementById('fitur').value,
+      jenis_feedback: (document.querySelector('input[name="jenis_feedback"]:checked') || {}).value || '',
+      deskripsi: document.getElementById('deskripsi').value.trim(),
+      harapan: document.getElementById('harapan').value.trim(),
+      urgensi: (document.querySelector('input[name="urgensi"]:checked') || {}).value || '',
+      lampiran: Array.from(document.getElementById('lampiran').files).map(function (f) { return f.name; })
+    };
+  }
+
+  function saveCurrentFeedback() {
+    savedFeedbacks.push(readSection3());
+    renderSavedList();
+  }
+
+  function resetSection3Fields() {
+    document.getElementById('fitur').value = '';
+    document.getElementById('fitur-lainnya').value = '';
+    document.getElementById('fitur-lainnya-wrap').classList.remove('show');
+    document.querySelectorAll('input[name="jenis_feedback"]').forEach(function (r) { r.checked = false; });
+    document.getElementById('deskripsi').value = '';
+    document.getElementById('harapan').value = '';
+    document.querySelectorAll('input[name="urgensi"]').forEach(function (r) { r.checked = false; });
+    document.getElementById('lampiran').value = '';
+    document.querySelectorAll('input[name="review_lagi"]').forEach(function (r) { r.checked = false; });
+  }
+
+  function renderSavedList() {
+    const list = document.getElementById('saved-list');
+    const info = document.getElementById('saved-info');
+    list.innerHTML = '';
+    if (savedFeedbacks.length === 0) {
+      info.classList.remove('show');
+      return;
+    }
+    info.textContent = 'Feedback yang telah disimpan: ' + savedFeedbacks.length;
+    info.classList.add('show');
+    savedFeedbacks.forEach(function (fb, i) {
+      const li = document.createElement('li');
+      const label = document.createElement('span');
+      label.className = 'saved-label';
+      label.innerHTML = '<strong>' + (fb.fitur || '(tanpa fitur)') + '</strong> — ' + (fb.jenis_feedback || '');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-remove';
+      btn.textContent = '✕ Hapus';
+      btn.addEventListener('click', function () {
+        savedFeedbacks.splice(i, 1);
+        renderSavedList();
+      });
+      li.appendChild(label);
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+  }
+
+  // ---- Conditional fields (global) ----
+  function bindConditionals() {
+    // UPT "Lainnya"
+    const upt = document.getElementById('upt');
+    upt.addEventListener('change', function () {
+      document.getElementById('upt-lainnya-wrap').classList.toggle('show', upt.value === '__lainnya__');
+    });
+
+    // Tujuan "Lainnya"
+    const tujuanLainnya = document.querySelector('input[name="tujuan"][value="__lainnya__"]');
+    const tujuanWrap = document.getElementById('tujuan-lainnya-wrap');
+    document.querySelectorAll('input[name="tujuan"]').forEach(function (c) {
+      c.addEventListener('change', function () {
+        tujuanWrap.classList.toggle('show', tujuanLainnya.checked);
+      });
+    });
+
+    // Fitur "Lainnya"
+    const fitur = document.getElementById('fitur');
+    fitur.addEventListener('change', function () {
+      document.getElementById('fitur-lainnya-wrap').classList.toggle('show', fitur.value === '__lainnya__');
+    });
+
+    // Kontak (Section 5)
+    const dihubungi = document.querySelectorAll('input[name="dihubungi"]');
+    const kontakWrap = document.getElementById('kontak-wrap');
+    dihubungi.forEach(function (r) {
+      r.addEventListener('change', function () {
+        kontakWrap.classList.toggle('show', r.value === 'Ya' && r.checked);
+      });
+    });
+  }
+
+  // ---- Form submission ----
+  function collectData() {
+    const data = {
+      section1: {
+        nama: document.getElementById('nama').value.trim(),
+        upt: document.getElementById('upt').value === '__lainnya__'
+          ? document.getElementById('upt-lainnya').value.trim()
+          : document.getElementById('upt').value,
+        jabatan: document.getElementById('jabatan').value.trim(),
+        perangkat: (document.querySelector('input[name="perangkat"]:checked') || {}).value || '',
+        koneksi: (document.querySelector('input[name="koneksi"]:checked') || {}).value || '',
+        pernah_v1: (document.querySelector('input[name="pernah_v1"]:checked') || {}).value || ''
+      },
+      section2: {
+        tujuan: Array.from(document.querySelectorAll('input[name="tujuan"]:checked'))
+          .map(function (c) { return c.value === '__lainnya__' ? ('Lainnya: ' + document.getElementById('tujuan-lainnya').value.trim()) : c.value; }),
+        relevansi: (document.querySelector('input[name="relevansi"]:checked') || {}).value || '',
+        loading: (document.querySelector('input[name="loading"]:checked') || {}).value || '',
+        kemudahan: {
+          search: (document.querySelector('input[name="grid_search"]:checked') || {}).value || '',
+          layers: (document.querySelector('input[name="grid_layers"]:checked') || {}).value || '',
+          legend: (document.querySelector('input[name="grid_legend"]:checked') || {}).value || '',
+          slider: (document.querySelector('input[name="grid_slider"]:checked') || {}).value || ''
+        }
+      },
+      section3: savedFeedbacks.concat([readSection3()]),
+      section4: {
+        prioritas: document.getElementById('prioritas').value.trim(),
+        dihubungi: (document.querySelector('input[name="dihubungi"]:checked') || {}).value || '',
+        kontak: document.getElementById('kontak').value.trim()
+      }
+    };
+
+    return data;
+  }
+
+  document.getElementById('inawis-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!validateSection(3)) return;
+
+    const data = collectData();
+
+    // Resolusi endpoint: prioritas ke Google Apps Script (config.js),
+    // lalu server lokal (server.rb), lalu localStorage.
+    const configured = (window.INWIS_CONFIG && window.INWIS_CONFIG.APPS_SCRIPT_URL) || '';
+    const isLocal = window.location.protocol === 'http:' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const APPS_SCRIPT_URL = configured || (isLocal ? '/api/submit' : '');
+
+    const submitBtn = document.querySelector('.form-section.active button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Mengirim...';
+
+    function finish() {
+      document.getElementById('inawis-form').style.display = 'none';
+      document.querySelector('.progress-wrap').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+
+      const summaryBox = document.getElementById('summary-box');
+      summaryBox.style.display = 'block';
+      document.getElementById('summary-json').textContent = JSON.stringify(data, null, 2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (!APPS_SCRIPT_URL) {
+      // Tidak ada backend -> simpan ke localStorage.
+      saveToLocalStorage(data);
+      finish();
+      return;
+    }
+
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ data: data })
+    })
+      .then(function () { finish(); })
+      .catch(function () {
+        saveToLocalStorage(data);
+        finish();
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      });
+  });
+
+  function saveToLocalStorage(data) {
+    try {
+      const KEY = 'inawis_feedback_submissions';
+      const existing = JSON.parse(localStorage.getItem(KEY) || '[]');
+      existing.push({ submittedAt: new Date().toISOString(), data: data });
+      localStorage.setItem(KEY, JSON.stringify(existing));
+    } catch (err) {
+      // Abaikan jika localStorage tidak tersedia.
+    }
+  }
+
+  window.resetForm = function () {
+    document.getElementById('inawis-form').reset();
+    document.getElementById('inawis-form').style.display = '';
+    document.querySelector('.progress-wrap').style.display = '';
+    document.getElementById('success-screen').classList.remove('show');
+    document.getElementById('summary-box').style.display = 'none';
+
+    // Pulihkan tombol submit
+    const submitBtn = document.querySelector('.form-section[data-section="4"] button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Kirim Formulir';
+    }
+
+    // Reset conditional states
+    document.getElementById('upt-lainnya-wrap').classList.remove('show');
+    document.getElementById('tujuan-lainnya-wrap').classList.remove('show');
+    document.getElementById('fitur-lainnya-wrap').classList.remove('show');
+    document.getElementById('kontak-wrap').classList.remove('show');
+
+    // Reset saved feedbacks
+    savedFeedbacks.length = 0;
+    renderSavedList();
+
+    showSection(0);
+  };
+
+  // ---- Init ----
+  bindConditionals();
+  updateProgress();
+})();
+</script>
+</body>
+</html>
